@@ -15,8 +15,8 @@ test('react-transform-bem', t => {
 
 	function testFixture({ name, description, pluginOptions = {} }) {
 		planned++;
-		readFixture(name, source => {
-			readFixture(`${name}.expected`, expected => {
+		readFixture(`${name}.jsx`, source => {
+			readFixture(`${name}.expected.js`, expected => {
 				const result = transform(source, {
 					presets: ['react', 'es2015'],
 					plugins: [bem, pluginOptions]
@@ -28,7 +28,7 @@ test('react-transform-bem', t => {
 });
 
 function readFixture(name, callback) {
-	readFile(`test/fixtures/${name}.js`, (err, contents) => {
+	readFile(`test/fixtures/${name}`, (err, contents) => {
 		if (err) {
 			throw err;
 		}
