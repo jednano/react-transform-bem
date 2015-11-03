@@ -1,5 +1,6 @@
 import assign from 'lodash.assign';
 import isString from 'lodash.isstring';
+import keys from 'lodash.keys';
 
 const defaultOptions = {
 	blockPrefix: '',

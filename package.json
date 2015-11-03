@@ -4,9 +4,7 @@
   "description": "Constructs BEM class names from block, element and modifiers attributes.",
   "main": "index.js",
   "scripts": {
-    "test": "npm run babel && npm run tape",
-    "prebabelify": "rimraf dist",
-    "tape": "babel-tape-runner test/*.js"
+    "test": "babel-tape-runner test/*.js"
   },
   "repository": {
     "type": "git",
@@ -25,13 +23,8 @@
   "homepage": "https://github.com/jedmao/react-transform-bem#readme",
   "dependencies": {
     "lodash.assign": "^3.2.0",
-    "lodash.compact": "^3.0.0",
-    "lodash.isfunction": "^3.0.6",
-    "lodash.isplainobject": "^3.2.0",
     "lodash.isstring": "^3.0.1",
-    "lodash.keys": "^3.1.2",
-    "lodash.pick": "^3.1.0",
-    "lodash.uniq": "^3.2.2"
+    "lodash.keys": "^3.1.2"
   },
   "devDependencies": {
     "babel-core": "^6.0.17",
@@ -41,7 +34,6 @@
     "react": "^0.14.1",
     "react-tools": "^0.10.0",
     "react-transform": "0.0.3",
-    "rimraf": "^2.4.3",
     "tape": "^4.2.2"
   }
 }
