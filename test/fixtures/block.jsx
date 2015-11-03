@@ -6,7 +6,7 @@ export default React.createClass({
 
 	render() {
 		return (
-			<div block="foo" modifiers="mod1 {visible}" className="wide" />
+			<div block="foo" modifiers="x {y}" className="z" />
 		);
 	}
 

@@ -15,6 +15,6 @@ exports.default = _react2.default.createClass({
 	displayName: 'Foo',
 
 	render: function render() {
-		return _react2.default.createElement('div', { block: 'foo', modifiers: 'mod1 {visible}', className: 'foo foo--mod1 foo--{visible} wide' });
+		return _react2.default.createElement('div', { block: 'foo', modifiers: 'x {y}', className: 'foo foo--x foo--{y} z' });
 	}
 });

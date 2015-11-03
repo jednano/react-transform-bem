@@ -11,6 +11,11 @@ test('react-transform-bem', t => {
 		description: 'resolves a block\'s class name'
 	});
 
+	testFixture({
+		name: 'stateless-functional',
+		description: 'resolves a stateless functional component'
+	});
+
 	t.plan(planned);
 
 	function testFixture({ name, description, pluginOptions = {} }) {
