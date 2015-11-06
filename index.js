@@ -26,17 +26,20 @@ export default ({ options, types: t }) => {
 
 				let element, modifiers;
 				attrs.forEach(({ name, value }, index) => {
-					if (name.name === 'block') {
-						block = value.value;
-						delete attrs[index];
-					}
 					if (name.name === 'element') {
 						element = value.value;
 						delete attrs[index];
+						return;
 					}
 					if (name.name === 'modifiers') {
 						modifiers = value.value;
 						delete attrs[index];
+						return;
+					}
+					if (name.name === 'block') {
+						block = value.value;
+						delete attrs[index];
+						return;
 					}
 				});
 
