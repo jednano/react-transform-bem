@@ -1,4 +1,4 @@
-import { readFile } from 'fs';
+import { readFile, writeFile } from 'fs';
 import test from 'tape';
 import { transform } from 'babel-core';
 import bem from '..';
@@ -12,21 +12,27 @@ test('react-transform-bem', t => {
 	});
 
 	testFixture({
-		name: 'stateless-functional',
-		description: 'resolves a stateless functional component'
+		name: 'block-with-element',
+		description: 'resolves a block with an element'
+	});
+
+	testFixture({
+		name: 'functional',
+		description: 'resolves a functional component'
 	});
 
 	t.plan(planned);
 
 	function testFixture({ name, description, pluginOptions = {} }) {
 		planned++;
-		readFixture(`${name}.jsx`, source => {
-			readFixture(`${name}.expected.js`, expected => {
+		readFixture(`${name}/input.jsx`, source => {
+			readFixture(`${name}/expected.js`, expected => {
 				const result = transform(source, {
 					presets: ['react', 'es2015'],
 					plugins: [bem, pluginOptions]
 				});
 				t.equal(result.code, expected + '', description);
+				writeFile(`test/fixtures/${name}/actual.js`, result.code);
 			});
 		});
 	}

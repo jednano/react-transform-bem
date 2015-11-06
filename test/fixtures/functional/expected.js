@@ -5,5 +5,5 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function () {
-	return React.createElement("div", { block: "foo", modifiers: "x {y}", className: "foo foo--x foo--{y} z" });
+	return React.createElement("div", { className: "b b--m1 b--{m2} c1" });
 };

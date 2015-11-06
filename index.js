@@ -1,6 +1,9 @@
 import assign from 'lodash.assign';
+import compact from 'lodash.compact';
+import isPlainObject from 'lodash.isplainobject';
 import isString from 'lodash.isstring';
 import keys from 'lodash.keys';
+import pick from 'lodash.pick';
 
 const defaultOptions = {
 	blockPrefix: '',
@@ -13,48 +16,49 @@ let opts;
 export default ({ options, types: t }) => {
 	opts = assign({}, defaultOptions, options);
 
+	let block;
+
 	return {
 		visitor: {
-			CallExpression(node, parent) {
-				const { callee } = node.node;
-				if (!t.isMemberExpression(callee)) {
-					return;
-				}
-				if (callee.object.name !== 'React') {
-					return;
-				}
-				if (callee.property.name !== 'createElement') {
-					return;
-				}
+			JSXElement(node, parent) {
+				const { openingElement } = node.node;
+				const attrs = openingElement.attributes;
 
-				const args = node.node.arguments;
-				let [ type, props ] = args;
-				if (!t.isStringLiteral(type)) {
-					return;
-				}
-				if (!t.isObjectExpression(props)) {
-					return;
-				}
-
-				let block, element, modifiers;
-				props.properties.forEach(prop => {
-					const { key, value } = prop;
-					if (key.name === 'block') {
+				let element, modifiers;
+				attrs.forEach(({ name, value }, index) => {
+					if (name.name === 'block') {
 						block = value.value;
+						delete attrs[index];
 					}
-					if (key.name === 'element') {
+					if (name.name === 'element') {
 						element = value.value;
+						delete attrs[index];
 					}
-					if (key.name === 'modifiers') {
+					if (name.name === 'modifiers') {
 						modifiers = value.value;
+						delete attrs[index];
 					}
 				});
 
-				props.properties.forEach(prop => {
-					const { key, value } = prop;
-					if (key.name === 'className') {
-						value.value =
-							buildModifiers(element || block, modifiers)
+				if (!block) {
+					if (element) {
+						throw new Error('BEM element must have an ancestor block');
+					}
+					if (modifiers) {
+						throw new Error('BEM modifiers must be attached to a block or an element');
+					}
+					return;
+				}
+
+				openingElement.attributes = compact(attrs);
+
+				attrs.forEach(({ name, value }) => {
+					if (name.name === 'className') {
+						let prefix = `${opts.blockPrefix}${block}`;
+						if (element) {
+							prefix += `${opts.elementPrefix}${element}`;
+						}
+						value.value = buildModifiers(prefix, modifiers)
 							.concat(value.value)
 							.join(' ');
 					}
@@ -64,21 +68,16 @@ export default ({ options, types: t }) => {
 	};
 }
 
-function buildModifiers(blockOrElement, modifiers) {
-    if (!modifiers) {
-        return [blockOrElement];
-    }
-    if (isString(modifiers)) {
-        modifiers = modifiers.split(/\s+/);
-    } else if (isPlainObject(modifiers)) {
-        modifiers = keys(pick(modifiers, v => !!v));
-    }
-    return [blockOrElement].concat(modifiers.map(modifier => {
-    	return [
-    		opts.blockPrefix,
-    		blockOrElement,
-    		opts.modifierPrefix,
-    		modifier
-    	].join('');
-    }));
+function buildModifiers(prefix, modifiers) {
+	if (!modifiers) {
+		return [prefix];
+	}
+	if (isString(modifiers)) {
+		modifiers = modifiers.split(/\s+/);
+	} else if (isPlainObject(modifiers)) {
+		modifiers = keys(pick(modifiers, v => !!v));
+	}
+	return [prefix].concat(modifiers.map(
+		modifier => `${prefix}${opts.modifierPrefix}${modifier}`
+	));
 }
