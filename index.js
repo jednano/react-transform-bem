@@ -104,9 +104,9 @@ function assignClassName({ attrs, block, element, modifiers }) {
 		value.value = classNameList.concat(value.value).join(' ');
 		return;
 	}
-	attrs.push(t.JSXAttribute(
-		t.JSXIdentifier('className'),
-		t.StringLiteral(classNameList.join(' '))
+	attrs.push(new t.JSXAttribute(
+		new t.JSXIdentifier('className'),
+		new t.StringLiteral(classNameList.join(' '))
 	));
 }
 
