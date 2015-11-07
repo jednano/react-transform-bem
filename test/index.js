@@ -8,7 +8,7 @@ test('react-transform-bem', t => {
 
 	testFixture({
 		name: 'block',
-		description: 'resolves a block\'s class name'
+		description: 'resolves a block'
 	});
 
 	testFixture({
@@ -18,7 +18,7 @@ test('react-transform-bem', t => {
 
 	testFixture({
 		name: 'functional',
-		description: 'resolves a functional component'
+		description: 'resolves a functional component with a block'
 	});
 
 	t.plan(planned);
