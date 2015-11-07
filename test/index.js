@@ -12,8 +12,13 @@ test('react-transform-bem', t => {
 	});
 
 	testFixture({
-		name: 'block-expression',
-		description: 'resolves a block defined as an expression container'
+		name: 'block-simple-expression',
+		description: 'resolves a block defined as a simple expression'
+	});
+
+	testFixture({
+		name: 'block-spread-attr',
+		description: 'resolves a block defined in a spread attribute'
 	});
 
 	testFixture({

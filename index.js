@@ -58,7 +58,24 @@ function walkJSXElements(ancestorBlock, node) {
 function consumeBEMAttributes(elem) {
 	let attrs = elem.attributes;
 	let block, element, modifiers;
-	attrs.forEach(({ name, value }, index) => {
+	attrs.forEach((attr, index) => {
+		if (t.isJSXSpreadAttribute(attr)) {
+			const props = consumeBEMProperties(attr.argument);
+			if (props.block) {
+				block = props.block;
+			}
+			if (props.element) {
+				element = props.element;
+			}
+			if (props.modifiers) {
+				modifiers = props.modifiers;
+			}
+			if (!attr.argument.properties.length) {
+				delete attrs[index];
+			}
+			return;
+		}
+		const { name, value } = attr;
 		if (name.name === 'element') {
 			element = value.value || `{${value.expression.name}}`;
 			delete attrs[index];
@@ -76,6 +93,31 @@ function consumeBEMAttributes(elem) {
 		}
 	});
 	elem.attributes = compact(attrs);
+	return { block, element, modifiers };
+}
+
+function consumeBEMProperties(obj) {
+	let props = obj.properties;
+	let block, element, modifiers;
+	props.forEach((prop, index) => {
+		const { key, value } = prop;
+		if (key.name === 'element') {
+			element = `{${value.name}}`;
+			delete props[index];
+			return;
+		}
+		if (key.name === 'modifiers') {
+			modifiers = `{${value.name}}`;
+			delete props[index];
+			return;
+		}
+		if (key.name === 'block') {
+			block = `{${value.name}}`;
+			delete props[index];
+			return;
+		}
+	});
+	obj.properties = compact(props);
 	return { block, element, modifiers };
 }
 
@@ -98,7 +140,12 @@ function assignClassName({ attrs, block, element, modifiers }) {
 		prefix += `${opts.elementPrefix}${element}`;
 	}
 	const classNameList = buildModifiers(prefix, modifiers);
-	const classNameAttr = find(attrs, attr => attr.name.name === 'className');
+	const classNameAttr = find(attrs, attr => {
+		if (t.isJSXSpreadAttribute(attr)) {
+			return;
+		}
+		return attr.name.name === 'className'
+	});
 	if (classNameAttr) {
 		const { value } = classNameAttr;
 		value.value = classNameList.concat(value.value).join(' ');
