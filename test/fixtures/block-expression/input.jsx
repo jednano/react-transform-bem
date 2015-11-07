@@ -3,10 +3,9 @@ export default React.createClass({
 	displayName: 'Foo',
 
 	render() {
+		const block = 'b';
 		return (
-			<div block="b">
-				<div element="e1" />
-			</div>
+			<div block={block} />
 		);
 	}
 

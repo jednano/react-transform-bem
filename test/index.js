@@ -7,18 +7,23 @@ test('react-transform-bem', t => {
 	let planned = 0;
 
 	testFixture({
-		name: 'block',
-		description: 'resolves a block'
+		name: 'block-string-literal',
+		description: 'resolves a block defined as a string literal'
+	});
+
+	testFixture({
+		name: 'block-expression',
+		description: 'resolves a block defined as an expression container'
+	});
+
+	testFixture({
+		name: 'block-functional',
+		description: 'resolves a block defined in a functional component'
 	});
 
 	testFixture({
 		name: 'block-with-element',
 		description: 'resolves a block with an element'
-	});
-
-	testFixture({
-		name: 'functional',
-		description: 'resolves a functional component with a block'
 	});
 
 	t.plan(planned);

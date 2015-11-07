@@ -60,17 +60,17 @@ function consumeBEMAttributes(elem) {
 	let block, element, modifiers;
 	attrs.forEach(({ name, value }, index) => {
 		if (name.name === 'element') {
-			element = value.value;
+			element = value.value || `{${value.expression.name}}`;
 			delete attrs[index];
 			return;
 		}
 		if (name.name === 'modifiers') {
-			modifiers = value.value;
+			modifiers = value.value || `{${value.expression.name}}`;
 			delete attrs[index];
 			return;
 		}
 		if (name.name === 'block') {
-			block = value.value;
+			block = value.value || `{${value.expression.name}}`;
 			delete attrs[index];
 			return;
 		}
