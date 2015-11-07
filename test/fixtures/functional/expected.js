@@ -5,5 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function () {
-	return React.createElement("div", { className: "b b--m1 b--{m2} c1" });
+	return React.createElement("div", {
+		className: "b"
+	});
 };

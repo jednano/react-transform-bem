@@ -8,6 +8,8 @@ exports.default = React.createClass({
 	displayName: 'Foo',
 
 	render: function render() {
-		return React.createElement("div", { className: "b b--m1 b--{m2} c1" });
+		return React.createElement("div", {
+			className: "b"
+		});
 	}
 });

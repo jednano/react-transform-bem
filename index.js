@@ -1,5 +1,6 @@
 import assign from 'lodash.assign';
 import compact from 'lodash.compact';
+import find from 'lodash.find';
 import isPlainObject from 'lodash.isplainobject';
 import isString from 'lodash.isstring';
 import keys from 'lodash.keys';
@@ -11,10 +12,11 @@ const defaultOptions = {
 	modifierPrefix: '--'
 };
 
-let opts;
+let opts, t;
 
-export default ({ options, types: t }) => {
+export default ({ options, types }) => {
 	opts = assign({}, defaultOptions, options);
+	t = types;
 
 	return {
 		visitor: {
@@ -23,29 +25,34 @@ export default ({ options, types: t }) => {
 			}
 		}
 	};
+}
 
-	function walkJSXElements(ancestorBlock, node) {
-		if (!t.isJSXElement(node)) {
-			return;
-		}
-		const { openingElement, children } = node;
-		let { block, element, modifiers } = consumeBEMAttributes(openingElement);
-
-		block = block || ancestorBlock;
-
-		if (!validateBEMAttributes({ block, element, modifiers })) {
-			return;
-		}
-
-		assignClassName({
-			attrs: openingElement.attributes,
-			block,
-			element,
-			modifiers
-		});
-
-		children.forEach(walkJSXElements.bind(this, block));
+function walkJSXElements(ancestorBlock, node) {
+	if (!t.isJSXElement(node)) {
+		return;
 	}
+
+	const { openingElement, children } = node;
+	let { block, element, modifiers } = consumeBEMAttributes(openingElement);
+
+	if (block && element) {
+		throw new Error('BEM element cannot also be a block');
+	}
+
+	block = block || ancestorBlock;
+
+	if (!validateBEMAttributes({ block, element, modifiers })) {
+		return;
+	}
+
+	assignClassName({
+		attrs: openingElement.attributes,
+		block,
+		element,
+		modifiers
+	});
+
+	children.forEach(walkJSXElements.bind(this, block));
 }
 
 function consumeBEMAttributes(elem) {
@@ -86,17 +93,21 @@ function validateBEMAttributes({ block, element, modifiers }) {
 }
 
 function assignClassName({ attrs, block, element, modifiers }) {
-	attrs.forEach(({ name, value }) => {
-		if (name.name === 'className') {
-			let prefix = `${opts.blockPrefix}${block}`;
-			if (element) {
-				prefix += `${opts.elementPrefix}${element}`;
-			}
-			value.value = buildModifiers(prefix, modifiers)
-				.concat(value.value)
-				.join(' ');
-		}
-	});
+	let prefix = `${opts.blockPrefix}${block}`;
+	if (element) {
+		prefix += `${opts.elementPrefix}${element}`;
+	}
+	const classNameList = buildModifiers(prefix, modifiers);
+	const classNameAttr = find(attrs, attr => attr.name.name === 'className');
+	if (classNameAttr) {
+		const { value } = classNameAttr;
+		value.value = classNameList.concat(value.value).join(' ');
+		return;
+	}
+	attrs.push(t.JSXAttribute(
+		t.JSXIdentifier('className'),
+		t.StringLiteral(classNameList.join(' '))
+	));
 }
 
 function buildModifiers(prefix, modifiers) {
