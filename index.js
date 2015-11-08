@@ -1,3 +1,4 @@
+import { Children } from 'react';
 import assign from 'lodash.assign';
 import compact from 'lodash.compact';
 import find from 'lodash.find';
@@ -20,20 +21,31 @@ export default ({ options, types }) => {
 
 	return {
 		visitor: {
-			JSXElement(node) {
-				walkJSXElements(null, node.node);
+			CallExpression(node) {
+				if (t.isReturnStatement(node.parent)) {
+					walkCallExpressions(null, node.node);
+				}
 			}
 		}
 	};
 }
 
-function walkJSXElements(ancestorBlock, node) {
-	if (!t.isJSXElement(node)) {
+function walkCallExpressions(ancestorBlock, node) {
+	if (!isReactCreateElementExpression(node)) {
 		return;
 	}
 
-	const { openingElement, children } = node;
-	let { block, element, modifiers } = consumeBEMAttributes(openingElement);
+	const [ type, props, children ] = node.arguments;
+
+	if (!t.isStringLiteral(type)) {
+		return;
+	}
+
+	if (!t.isObjectExpression(props)) {
+		return;
+	}
+
+	let { block, element, modifiers } = consumeBEMProperties(props);
 
 	if (block && element) {
 		throw new Error('BEM element cannot also be a block');
@@ -45,79 +57,54 @@ function walkJSXElements(ancestorBlock, node) {
 		return;
 	}
 
-	assignClassName({
-		attrs: openingElement.attributes,
-		block,
-		element,
-		modifiers
-	});
+	const { properties } = props;
+	assignClassName({ properties, block, element, modifiers });
 
-	children.forEach(walkJSXElements.bind(this, block));
+	if (!children) {
+		return;
+	}
+
+	if (children.forEach) {
+		Children.forEach(walkCallExpressions.bind(this, block));
+	} else {
+		walkCallExpressions(block, children);
+	}
 }
 
-function consumeBEMAttributes(elem) {
-	let attrs = elem.attributes;
-	let block, element, modifiers;
-	attrs.forEach((attr, index) => {
-		if (t.isJSXSpreadAttribute(attr)) {
-			const props = consumeBEMProperties(attr.argument);
-			if (props.block) {
-				block = props.block;
-			}
-			if (props.element) {
-				element = props.element;
-			}
-			if (props.modifiers) {
-				modifiers = props.modifiers;
-			}
-			if (!attr.argument.properties.length) {
-				delete attrs[index];
-			}
-			return;
-		}
-		const { name, value } = attr;
-		if (name.name === 'element') {
-			element = value.value || `{${value.expression.name}}`;
-			delete attrs[index];
-			return;
-		}
-		if (name.name === 'modifiers') {
-			modifiers = value.value || `{${value.expression.name}}`;
-			delete attrs[index];
-			return;
-		}
-		if (name.name === 'block') {
-			block = value.value || `{${value.expression.name}}`;
-			delete attrs[index];
-			return;
-		}
-	});
-	elem.attributes = compact(attrs);
-	return { block, element, modifiers };
+function isReactCreateElementExpression(node) {
+	const { callee } = node;
+	if (!t.isMemberExpression(callee)) {
+		return false;
+	}
+	if (callee.object.name !== 'React') {
+		return false;
+	}
+	if (callee.property.name !== 'createElement') {
+		return false;
+	}
+	return true;
 }
 
 function consumeBEMProperties(obj) {
-	let props = obj.properties;
 	let block, element, modifiers;
-	props.forEach((prop, index) => {
-		const { key, value } = prop;
+	obj.properties.forEach(({ key, value }, index) => {
 		if (key.name === 'element') {
-			element = `{${value.name}}`;
-			delete props[index];
+			element = value.value || `{${value.name}}`;
+			delete obj.properties[index];
 			return;
 		}
 		if (key.name === 'modifiers') {
-			modifiers = `{${value.name}}`;
-			delete props[index];
+			modifiers = value.value || `{${value.name}}`;
+			delete obj.properties[index];
 			return;
 		}
 		if (key.name === 'block') {
-			block = `{${value.name}}`;
-			delete props[index];
+			delete obj.properties[index];
+			block = value.value || `{${value.name}}`;
 			return;
 		}
 	});
-	obj.properties = compact(props);
+	obj.properties = compact(obj.properties);
 	return { block, element, modifiers };
 }
 
@@ -134,25 +121,20 @@ function validateBEMAttributes({ block, element, modifiers }) {
 	return false;
 }
 
-function assignClassName({ attrs, block, element, modifiers }) {
+function assignClassName({ properties, block, element, modifiers }) {
 	let prefix = `${opts.blockPrefix}${block}`;
 	if (element) {
 		prefix += `${opts.elementPrefix}${element}`;
 	}
 	const classNameList = buildModifiers(prefix, modifiers);
-	const classNameAttr = find(attrs, attr => {
-		if (t.isJSXSpreadAttribute(attr)) {
-			return;
-		}
-		return attr.name.name === 'className'
-	});
-	if (classNameAttr) {
-		const { value } = classNameAttr;
+	const classNameProp = find(properties, prop => prop.key.name === 'className');
+	if (classNameProp) {
+		const { value } = classNameProp;
 		value.value = classNameList.concat(value.value).join(' ');
 		return;
 	}
-	attrs.push(new t.JSXAttribute(
-		new t.JSXIdentifier('className'),
+	properties.push(new t.ObjectProperty(
+		new t.Identifier('className'),
 		new t.StringLiteral(classNameList.join(' '))
 	));
 }
