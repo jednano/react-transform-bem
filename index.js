@@ -1,10 +1,8 @@
 import assign from 'lodash.assign';
 import compact from 'lodash.compact';
 import find from 'lodash.find';
-import isPlainObject from 'lodash.isplainobject';
+import isArray from 'lodash.isarray';
 import isString from 'lodash.isstring';
-import keys from 'lodash.keys';
-import pick from 'lodash.pick';
 
 const defaultOptions = {
 	blockPrefix: '',
@@ -97,11 +95,26 @@ function consumeBEMProperties(obj) {
 
 	function consumeProperty({ value, index }) {
 		delete obj.properties[index];
-		if (t.isIdentifier(value)) {
-			return `{${value.name}}`;
-		}
-		return value.value;
+		return resolveTokenValue(value);
 	}
+}
+
+function resolveTokenValue(token) {
+	if (t.isStringLiteral(token) || t.isBooleanLiteral(token)) {
+		return token.value;
+	}
+	if (t.isIdentifier(token)) {
+		return `{${token.name}}`;
+	}
+	if (t.isObjectExpression(token)) {
+		return token.properties.map(({ key, value }) => {
+			return {
+				key: key.name,
+				value: resolveTokenValue(value)
+			};
+		});
+	}
+	throw new Error('Unsupported BEM value');
 }
 
 function validateBEMAttributes({ block, element, modifiers }) {
@@ -122,29 +135,40 @@ function assignClassName({ properties, block, element, modifiers }) {
 	if (element) {
 		prefix += `${opts.elementPrefix}${element}`;
 	}
-	const classNameList = buildModifiers(prefix, modifiers);
+	const className = buildModifiers(prefix, modifiers);
 	const classNameProp = find(properties, prop => prop.key.name === 'className');
 	if (classNameProp) {
 		const { value } = classNameProp;
-		value.value = classNameList.concat(value.value).join(' ');
+		value.value = `${className} ${value.value}`;
 		return;
 	}
 	properties.push(new t.ObjectProperty(
 		new t.Identifier('className'),
-		new t.StringLiteral(classNameList.join(' '))
+		new t.StringLiteral(className)
 	));
 }
 
 function buildModifiers(prefix, modifiers) {
 	if (!modifiers) {
-		return [prefix];
+		return prefix;
 	}
 	if (isString(modifiers)) {
-		modifiers = modifiers.split(/\s+/);
-	} else if (isPlainObject(modifiers)) {
-		modifiers = keys(pick(modifiers, v => !!v));
+		return [prefix].concat(modifiers.split(/\s+/g).map(
+			modifier => `${prefix}${opts.modifierPrefix}${modifier}`
+		)).join(' ');
 	}
-	return [prefix].concat(modifiers.map(
-		modifier => `${prefix}${opts.modifierPrefix}${modifier}`
-	));
+	if (isArray(modifiers)) {
+		modifiers = compact(modifiers.map(({ key, value }) => {
+			if (!value) {
+				return value;
+			}
+			key = `'${prefix}${opts.modifierPrefix}${key}'`;
+			if (value === true) {
+				return key;
+			}
+			return `{${key}:${value}}`;
+		}));
+		return `{classnames(['${prefix}',${modifiers.join(',')}])}`;
+	}
+	throw new Error('Unsupported value for BEM modifiers');
 }
