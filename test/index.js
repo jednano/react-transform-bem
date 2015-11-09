@@ -26,7 +26,9 @@ test('react-transform-bem', t => {
 				const { pluginOptions, description } = require(join(folder, 'spec'));
 				const result = transform(source, {
 					presets: ['react', 'es2015'],
-					plugins: [reactTransformBEM, pluginOptions || {}]
+					plugins: [
+						[reactTransformBEM, pluginOptions || {}]
+					]
 				});
 				t.equal(result.code, expected + '', description);
 				writeFile(join(folder, 'actual.js'), result.code);
