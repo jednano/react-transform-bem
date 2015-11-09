@@ -89,23 +89,28 @@ function consumeBEMProperties(obj) {
 	let block, element, modifiers;
 	obj.properties.forEach(({ key, value }, index) => {
 		if (key.name === 'element') {
-			element = value.value || `{${value.name}}`;
-			delete obj.properties[index];
+			element = consumeProperty({ value, index });
 			return;
 		}
 		if (key.name === 'modifiers') {
-			modifiers = value.value || `{${value.name}}`;
-			delete obj.properties[index];
+			modifiers = consumeProperty({ value, index });
 			return;
 		}
 		if (key.name === 'block') {
-			delete obj.properties[index];
-			block = value.value || `{${value.name}}`;
+			block = consumeProperty({ value, index });
 			return;
 		}
 	});
 	obj.properties = compact(obj.properties);
 	return { block, element, modifiers };
+
+	function consumeProperty({ value, index }) {
+		delete obj.properties[index];
+		if (t.isIdentifier(value)) {
+			return `{${value.name}}`;
+		}
+		return value.value;
+	}
 }
 
 function validateBEMAttributes({ block, element, modifiers }) {
