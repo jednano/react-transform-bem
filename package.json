@@ -35,6 +35,7 @@
     "babel-preset-es2015": "^6.0.15",
     "babel-preset-react": "^6.0.15",
     "babel-tape-runner": "^1.3.0",
+    "glob": "^5.0.15",
     "react": "^0.14.1",
     "react-tools": "^0.10.0",
     "react-transform": "0.0.3",

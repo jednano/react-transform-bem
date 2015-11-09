@@ -1,58 +1,36 @@
 import { readFile, writeFile } from 'fs';
+import { join } from 'path';
 import test from 'tape';
 import { transform } from 'babel-core';
+import glob from 'glob';
 import bem from '..';
 
 test('react-transform-bem', t => {
-	let planned = 0;
-
-	testFixture({
-		name: 'block-string-literal',
-		description: 'resolves a block defined as a string literal'
+	glob(join(__dirname, 'fixtures', '*'), (err, folders) => {
+		if (err) {
+			throw err;
+		}
+		t.plan(folders.length);
+		folders.forEach(folder => testFixture(folder));
 	});
 
-	testFixture({
-		name: 'block-simple-expression',
-		description: 'resolves a block defined as a simple expression'
-	});
-
-	testFixture({
-		name: 'block-spread-attr',
-		description: 'resolves a block defined in a spread attribute'
-	});
-
-	testFixture({
-		name: 'block-functional',
-		description: 'resolves a block defined in a functional component'
-	});
-
-	testFixture({
-		name: 'block-with-element',
-		description: 'resolves a block with an element'
-	});
-
-	t.plan(planned);
-
-	function testFixture({ name, description, pluginOptions = {} }) {
-		planned++;
-		readFixture(`${name}/input.jsx`, source => {
-			readFixture(`${name}/expected.js`, expected => {
+	function testFixture(folder) {
+		readFile(join(folder, 'input.jsx'), (err, source) => {
+			if (err) {
+				throw err;
+			}
+			readFile(join(folder, 'expected.js'), (err2, expected) => {
+				if (err2) {
+					throw err2;
+				}
+				const { pluginOptions, description } = require(join(folder, 'spec'));
 				const result = transform(source, {
 					presets: ['react', 'es2015'],
-					plugins: [bem, pluginOptions]
+					plugins: [bem, pluginOptions || {}]
 				});
 				t.equal(result.code, expected + '', description);
-				writeFile(`test/fixtures/${name}/actual.js`, result.code);
+				writeFile(join(folder, 'actual.js'), result.code);
 			});
 		});
 	}
 });
-
-function readFixture(name, callback) {
-	readFile(`test/fixtures/${name}`, (err, contents) => {
-		if (err) {
-			throw err;
-		}
-		callback(contents);
-	});
-}
