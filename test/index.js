@@ -3,7 +3,7 @@ import { join } from 'path';
 import test from 'tape';
 import { transform } from 'babel-core';
 import glob from 'glob';
-import bem from '..';
+import reactTransformBEM from '..';
 
 test('react-transform-bem', t => {
 	glob(join(__dirname, 'fixtures', '*'), (err, folders) => {
@@ -26,7 +26,7 @@ test('react-transform-bem', t => {
 				const { pluginOptions, description } = require(join(folder, 'spec'));
 				const result = transform(source, {
 					presets: ['react', 'es2015'],
-					plugins: [bem, pluginOptions || {}]
+					plugins: [reactTransformBEM, pluginOptions || {}]
 				});
 				t.equal(result.code, expected + '', description);
 				writeFile(join(folder, 'actual.js'), result.code);

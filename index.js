@@ -1,4 +1,3 @@
-import { Children } from 'react';
 import assign from 'lodash.assign';
 import compact from 'lodash.compact';
 import find from 'lodash.find';
@@ -35,7 +34,7 @@ function walkCallExpressions(ancestorBlock, node) {
 		return;
 	}
 
-	const [ type, props, children ] = node.arguments;
+	const [ type, props, ...children ] = node.arguments;
 
 	if (!t.isStringLiteral(type)) {
 		return;
@@ -60,15 +59,7 @@ function walkCallExpressions(ancestorBlock, node) {
 	const { properties } = props;
 	assignClassName({ properties, block, element, modifiers });
 
-	if (!children) {
-		return;
-	}
-
-	if (children.forEach) {
-		Children.forEach(walkCallExpressions.bind(this, block));
-	} else {
-		walkCallExpressions(block, children);
-	}
+	children.forEach(walkCallExpressions.bind(this, block));
 }
 
 function isReactCreateElementExpression(node) {
