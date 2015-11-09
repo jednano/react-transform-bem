@@ -107,12 +107,7 @@ function resolveTokenValue(token) {
 		return `{${token.name}}`;
 	}
 	if (t.isObjectExpression(token)) {
-		return token.properties.map(({ key, value }) => {
-			return {
-				key: key.name,
-				value: resolveTokenValue(value)
-			};
-		});
+		return token;
 	}
 	throw new Error('Unsupported BEM value');
 }
@@ -136,16 +131,39 @@ function assignClassName({ properties, block, element, modifiers }) {
 		prefix += `${opts.elementPrefix}${element}`;
 	}
 	const className = buildModifiers(prefix, modifiers);
+
 	const classNameProp = find(properties, prop => prop.key.name === 'className');
-	if (classNameProp) {
-		const { value } = classNameProp;
+	if (!classNameProp) {
+		properties.push(buildClassName());
+		return;
+	}
+
+	const { value } = classNameProp;
+
+	if (t.isStringLiteral(value)) {
 		value.value = `${className} ${value.value}`;
 		return;
 	}
-	properties.push(new t.ObjectProperty(
-		new t.Identifier('className'),
-		new t.StringLiteral(className)
-	));
+
+	if (isArray(className)) {
+		className.push(new t.StringLiteral(value.value));
+		classNameProp.value = buildClassName();
+		return;
+	}
+
+	throw new Error('Unsupported className for BEM block or element');
+
+	function buildClassName() {
+		return new t.ObjectProperty(
+			new t.Identifier('className'),
+			isString(className)
+				? new t.StringLiteral(className)
+				: new t.CallExpression(
+					new t.Identifier('classnames'),
+					className
+				)
+		);
+	}
 }
 
 function buildModifiers(prefix, modifiers) {
@@ -157,18 +175,23 @@ function buildModifiers(prefix, modifiers) {
 			modifier => `${prefix}${opts.modifierPrefix}${modifier}`
 		)).join(' ');
 	}
-	if (isArray(modifiers)) {
-		modifiers = compact(modifiers.map(({ key, value }) => {
-			if (!value) {
-				return value;
-			}
-			key = `'${prefix}${opts.modifierPrefix}${key}'`;
-			if (value === true) {
-				return key;
-			}
-			return `{${key}:${value}}`;
-		}));
-		return `{classnames(['${prefix}',${modifiers.join(',')}])}`;
+	if (t.isObjectExpression(modifiers)) {
+		return [new t.StringLiteral(prefix)].concat(
+			compact(modifiers.properties.map(({ key, value }) => {
+				key = new t.StringLiteral(
+					`${prefix}${opts.modifierPrefix}${key.name}`
+				);
+				if (t.isBooleanLiteral(value)) {
+					if (value.value === false) {
+						return false;
+					}
+					return key;
+				}
+				return new t.ObjectExpression([
+					new t.ObjectProperty(key, value)
+				]);
+			}))
+		);
 	}
 	throw new Error('Unsupported value for BEM modifiers');
 }

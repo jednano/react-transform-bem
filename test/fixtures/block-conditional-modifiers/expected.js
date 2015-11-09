@@ -8,6 +8,10 @@ exports.default = function () {
 	var isFoo = true;
 	var isBar = false;
 	return React.createElement("div", {
-		className: "{classnames(['b',{'b--foo':{isFoo}},{'b--bar':{isBar}},'b--baz'])}"
+		className: classnames("b", {
+			"b--foo": isFoo
+		}, {
+			"b--bar": isBar
+		}, "b--baz")
 	});
 };
