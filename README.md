@@ -6,7 +6,7 @@
 
 [![npm](https://nodei.co/npm/react-transform-bem.svg?downloads=true)](https://nodei.co/npm/react-transform-bem/)
 
-A [`react-transform`](https://www.npmjs.com/package/react-transform) that
+A [`react-transform`](https://github.com/litek/react-transform) that
 constructs BEM classes from `block`, `element` and `modifiers` attributes.
 
 ## Introduction
@@ -18,7 +18,7 @@ constructs class names for you. All you have to do is specify which DOM
 elements are blocks with the `block` attribute, elements with the
 `element` attribute and modifiers with the `modifiers` attribute. These
 attributes will be consumed and replaced with the `className` attribute,
-where all necessary class names will be written.
+where all necessary class names are written.
 
 ## Installation
 
@@ -30,7 +30,7 @@ $ npm install react-transform-bem [--save[-dev]]
 
 The following React component...
 
-```js
+```jsx
 export default () => (
 	<div block="person" modifiers="female">
 		<div element="mouth" />
