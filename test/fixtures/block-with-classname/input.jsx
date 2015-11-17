@@ -1,5 +1,3 @@
-export default () => {
-	return (
-		<div block="b" className="c" />
-	);
-};
+export default () => (
+	<div block="b" className="c" />
+);
