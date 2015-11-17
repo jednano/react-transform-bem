@@ -41,6 +41,12 @@ function walkCallExpressions(ancestorBlock, node) {
 
 	if (t.isIdentifier(type)) {
 		let { block, element, modifiers } = getBEMProperties(props);
+		if (element && !block) {
+			props.properties.unshift(new t.ObjectProperty(
+				new t.Identifier('block'),
+				new t.StringLiteral(ancestorBlock)
+			));
+		}
 		children.forEach(walkCallExpressions.bind(this, block || ancestorBlock));
 		return;
 	}
@@ -51,10 +57,6 @@ function walkCallExpressions(ancestorBlock, node) {
 	}
 
 	let { block, element, modifiers } = consumeBEMProperties(props);
-
-	if (block && element) {
-		throw new Error('BEM element cannot also be a block');
-	}
 
 	block = block || ancestorBlock;
 
