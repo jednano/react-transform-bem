@@ -1,7 +1,6 @@
 import assign from 'lodash.assign';
 import compact from 'lodash.compact';
 import find from 'lodash.find';
-import isArray from 'lodash.isarray';
 import isString from 'lodash.isstring';
 
 const defaultOptions = {
@@ -28,6 +27,7 @@ export default ({ options, types }) => {
 }
 
 function walkCallExpressions(ancestorBlock, node) {
+	/* istanbul ignore next */
 	if (!isReactCreateElementExpression(node)) {
 		return;
 	}
@@ -59,12 +59,15 @@ function walkCallExpressions(ancestorBlock, node) {
 
 function isReactCreateElementExpression(node) {
 	const { callee } = node;
+	/* istanbul ignore next */
 	if (!t.isMemberExpression(callee)) {
 		return false;
 	}
+	/* istanbul ignore next */
 	if (callee.object.name !== 'React') {
 		return false;
 	}
+	/* istanbul ignore next */
 	if (callee.property.name !== 'createElement') {
 		return false;
 	}
@@ -136,12 +139,6 @@ function assignClassName({ properties, block, element, modifiers }) {
 
 	if (t.isStringLiteral(value)) {
 		value.value = `${className} ${value.value}`;
-		return;
-	}
-
-	if (isArray(className)) {
-		className.push(new t.StringLiteral(value.value));
-		classNameProp.value = buildClassName();
 		return;
 	}
 
