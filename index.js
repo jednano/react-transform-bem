@@ -34,11 +34,8 @@ function walkCallExpressions(ancestorBlock, node) {
 
 	const [ type, props, ...children ] = node.arguments;
 
-	if (!t.isStringLiteral(type)) {
-		return;
-	}
-
-	if (!t.isObjectExpression(props)) {
+	if (!t.isStringLiteral(type) || !t.isObjectExpression(props)) {
+		children.forEach(walkCallExpressions.bind(this, ancestorBlock));
 		return;
 	}
 
@@ -50,14 +47,14 @@ function walkCallExpressions(ancestorBlock, node) {
 
 	block = block || ancestorBlock;
 
+	children.forEach(walkCallExpressions.bind(this, block));
+
 	if (!validateBEMAttributes({ block, element, modifiers })) {
 		return;
 	}
 
 	const { properties } = props;
 	assignClassName({ properties, block, element, modifiers });
-
-	children.forEach(walkCallExpressions.bind(this, block));
 }
 
 function isReactCreateElementExpression(node) {
