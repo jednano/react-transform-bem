@@ -27,7 +27,7 @@ export default ({ options, types }) => {
 }
 
 function walkCallExpressions(ancestorBlock, node) {
-	/* istanbul ignore next */
+	/* istanbul ignore if */
 	if (!isReactCreateElementExpression(node)) {
 		return;
 	}
@@ -40,7 +40,7 @@ function walkCallExpressions(ancestorBlock, node) {
 	}
 
 	if (t.isIdentifier(type)) {
-		let { block, element, modifiers } = getBEMProperties(props);
+		let { block, element } = getBlockAndElement(props);
 		if (element && !block) {
 			props.properties.unshift(new t.ObjectProperty(
 				new t.Identifier('block'),
@@ -48,11 +48,6 @@ function walkCallExpressions(ancestorBlock, node) {
 			));
 		}
 		children.forEach(walkCallExpressions.bind(this, block || ancestorBlock));
-		return;
-	}
-
-	if (!t.isStringLiteral(type)) {
-		children.forEach(walkCallExpressions.bind(this, ancestorBlock));
 		return;
 	}
 
@@ -72,32 +67,29 @@ function walkCallExpressions(ancestorBlock, node) {
 
 function isReactCreateElementExpression(node) {
 	const { callee } = node;
-	/* istanbul ignore next */
+	/* istanbul ignore if */
 	if (!t.isMemberExpression(callee)) {
 		return false;
 	}
-	/* istanbul ignore next */
+	/* istanbul ignore if */
 	if (callee.object.name !== 'React') {
 		return false;
 	}
-	/* istanbul ignore next */
+	/* istanbul ignore if */
 	if (callee.property.name !== 'createElement') {
 		return false;
 	}
 	return true;
 }
 
-function getBEMProperties(obj) {
+function getBlockAndElement(obj) {
 	let block, element, modifiers;
 	obj.properties.forEach(({ key, value }, index) => {
 		if (key.name === 'element') {
 			element = resolveTokenValue(value);
 			return;
 		}
-		if (key.name === 'modifiers') {
-			modifiers = resolveTokenValue(value);
-			return;
-		}
+		/* istanbul ignore else */
 		if (key.name === 'block') {
 			block = resolveTokenValue(value);
 			return;
@@ -117,6 +109,7 @@ function consumeBEMProperties(obj) {
 			modifiers = consumeProperty({ value, index });
 			return;
 		}
+		/* istanbul ignore else */
 		if (key.name === 'block') {
 			block = consumeProperty({ value, index });
 			return;
