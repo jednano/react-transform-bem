@@ -1,0 +1,4 @@
+{
+	"description": "throws when modifiers aren't attached to a block or element",
+	"throwsRegExp": "BEM modifiers must be attached to a block or an element$"
+}
