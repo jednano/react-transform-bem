@@ -4,6 +4,7 @@
   "description": "Constructs BEM classes from block, element and modifiers attributes.",
   "main": "index.js",
   "scripts": {
+    "tape": "babel-tape-runner test/index.js",
     "test": "npm run cover && npm run check-coverage",
     "cover": "babel-node node_modules/isparta/bin/isparta cover test/index.js",
     "check-coverage": "istanbul check-coverage"

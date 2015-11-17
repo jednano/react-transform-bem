@@ -34,7 +34,18 @@ function walkCallExpressions(ancestorBlock, node) {
 
 	const [ type, props, ...children ] = node.arguments;
 
-	if (!t.isStringLiteral(type) || !t.isObjectExpression(props)) {
+	if (!t.isObjectExpression(props)) {
+		children.forEach(walkCallExpressions.bind(this, ancestorBlock));
+		return;
+	}
+
+	if (t.isIdentifier(type)) {
+		let { block, element, modifiers } = getBEMProperties(props);
+		children.forEach(walkCallExpressions.bind(this, block || ancestorBlock));
+		return;
+	}
+
+	if (!t.isStringLiteral(type)) {
 		children.forEach(walkCallExpressions.bind(this, ancestorBlock));
 		return;
 	}
@@ -72,6 +83,25 @@ function isReactCreateElementExpression(node) {
 		return false;
 	}
 	return true;
+}
+
+function getBEMProperties(obj) {
+	let block, element, modifiers;
+	obj.properties.forEach(({ key, value }, index) => {
+		if (key.name === 'element') {
+			element = resolveTokenValue(value);
+			return;
+		}
+		if (key.name === 'modifiers') {
+			modifiers = resolveTokenValue(value);
+			return;
+		}
+		if (key.name === 'block') {
+			block = resolveTokenValue(value);
+			return;
+		}
+	});
+	return { block, element, modifiers };
 }
 
 function consumeBEMProperties(obj) {
