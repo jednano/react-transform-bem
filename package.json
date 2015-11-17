@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run cover && npm run check-coverage",
-    "cover": "sh cover",
+    "cover": "babel-node node_modules/isparta/bin/isparta cover test/index.js",
     "check-coverage": "istanbul check-coverage"
   },
   "repository": {
