@@ -1,0 +1,4 @@
+{
+	"description": "throws when an element has no ancestor block",
+	"throwsRegExp": "BEM element must have an ancestor block$"
+}
