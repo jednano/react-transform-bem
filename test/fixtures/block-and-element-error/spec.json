@@ -1,0 +1,4 @@
+{
+	"description": "throws when a block and element are assigned to the same node",
+	"throwsRegExp": "BEM element cannot also be a block$"
+}

@@ -19,17 +19,26 @@ test('react-transform-bem', t => {
 			if (err) {
 				throw err;
 			}
+			const xform = () => transform(source, {
+				presets: ['react', 'es2015'],
+				plugins: [
+					[reactTransformBEM, pluginOptions || {}]
+				]
+			});
+			const {
+				pluginOptions,
+				description,
+				throwsRegExp
+			} = require(join(folder, 'spec'));
+			if (throwsRegExp) {
+				t.throws(xform, new RegExp(throwsRegExp), description);
+				return;
+			}
 			readFile(join(folder, 'expected.js'), (err2, expected) => {
 				if (err2) {
 					throw err2;
 				}
-				const { pluginOptions, description } = require(join(folder, 'spec'));
-				const result = transform(source, {
-					presets: ['react', 'es2015'],
-					plugins: [
-						[reactTransformBEM, pluginOptions || {}]
-					]
-				});
+				const result = xform();
 				t.equal(result.code, expected + '', description);
 				writeFile(join(folder, 'actual.js'), result.code);
 			});
