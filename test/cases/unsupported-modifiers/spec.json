@@ -1,0 +1,4 @@
+{
+	"description": "throws when unsupported modifiers are provided",
+	"throwsRegExp": "Unsupported value for BEM modifiers$"
+}
