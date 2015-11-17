@@ -6,15 +6,15 @@ import glob from 'glob';
 import reactTransformBEM from '..';
 
 test('react-transform-bem', t => {
-	glob(join(__dirname, 'fixtures', '*'), (err, folders) => {
+	glob(join(__dirname, 'cases', '*'), (err, folders) => {
 		if (err) {
 			throw err;
 		}
 		t.plan(folders.length);
-		folders.forEach(folder => testFixture(folder));
+		folders.forEach(folder => testCase(folder));
 	});
 
-	function testFixture(folder) {
+	function testCase(folder) {
 		readFile(join(folder, 'input.jsx'), (err, source) => {
 			if (err) {
 				throw err;
