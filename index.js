@@ -106,10 +106,7 @@ function resolveTokenValue(token) {
 	if (t.isIdentifier(token)) {
 		return `{${token.name}}`;
 	}
-	if (t.isObjectExpression(token)) {
-		return token;
-	}
-	throw new Error('Unsupported BEM value');
+	return token;
 }
 
 function validateBEMAttributes({ block, element, modifiers }) {
