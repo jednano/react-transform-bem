@@ -1,13 +1,15 @@
 {
   "name": "react-transform-bem",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Constructs BEM classes from block, element and modifiers attributes.",
   "main": "index.js",
   "scripts": {
     "tape": "babel-tape-runner test/index.js",
+    "prepublish": "npm run test && npm run babelify",
     "test": "npm run cover && npm run check-coverage",
     "cover": "babel-node node_modules/isparta/bin/isparta cover test/index.js",
-    "check-coverage": "istanbul check-coverage"
+    "check-coverage": "istanbul check-coverage",
+    "babelify": "babel index.js --out-dir dist"
   },
   "repository": {
     "type": "git",
