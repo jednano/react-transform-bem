@@ -7,7 +7,7 @@
     "tape": "babel-tape-runner test/index.js",
     "prepublish": "npm run test && npm run babelify && npm run copy",
     "test": "npm run clean && npm run cover && npm run check-coverage",
-    "clean": "rm -Rf dist/**",
+    "clean": "rm -Rf dist",
     "cover": "babel-node node_modules/isparta/bin/isparta cover test/index.js",
     "check-coverage": "istanbul check-coverage",
     "babelify": "babel index.js --out-dir dist",
