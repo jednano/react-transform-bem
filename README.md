@@ -58,16 +58,29 @@ slightly and only when a modifier is used, which is still quite maintainable.
 
 A common strategy is to place a
 [babelrc](https://babeljs.io/docs/usage/babelrc/) file at your project root.
-Here is the default configuration:
+Here is a default configuration for [`babel-plugin-react-transform`](https://github.com/gaearon/babel-plugin-react-transform):
 
 ```json
 {
 	"presets": ["react", "es2015"],
 	"plugins": [
-		["react-transform-bem", {
-			"blockPrefix": "",
-			"elementPrefix": "__",
-			"modifierPrefix": "--"
+		["react-transform", {
+			"transforms": [
+				{
+					"transform": "react-transform-bem",
+					"imports": [
+						"react",
+						"classnames",
+						"lodash.assign",
+						"lodash.compact",
+						"lodash.find",
+						"lodash.isstring"
+					],
+					"blockPrefix": "",
+					"elementPrefix": "__",
+					"modifierPrefix": "--"
+				}
+			]
 		}]
 	]
 }
