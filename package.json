@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "tape": "babel-tape-runner test/index.js",
-    "build": "npm run clean && npm run babelify && npm run copy",
+    "test": "npm run clean && npm run cover && npm run check-coverage",
     "clean": "rm -Rf dist",
-    "babelify": "babel index.js --out-dir dist",
-    "copy": "cp package.json index.js LICENSE README.md dist",
-    "test": "npm run cover && npm run check-coverage",
     "cover": "babel-node node_modules/isparta/bin/isparta cover test/index.js",
-    "check-coverage": "istanbul check-coverage"
+    "check-coverage": "istanbul check-coverage",
+    "build": "npm run clean && npm run babelify && npm run copy",
+    "babelify": "babel index.js --out-dir dist",
+    "copy": "cp package.json index.js LICENSE README.md dist"
   },
   "repository": {
     "type": "git",
