@@ -9,9 +9,8 @@
     "clean": "rm -Rf dist",
     "cover": "babel-node node_modules/isparta/bin/isparta cover test/index.js",
     "check-coverage": "istanbul check-coverage",
-    "build": "npm run clean && npm run babelify",
+    "build": "npm run clean && npm run babelify && npm run copy",
     "babelify": "babel index.js --out-dir dist",
-    "prepublish": "npm run copy",
     "copy": "cp package.json LICENSE README.md dist"
   },
   "repository": {
